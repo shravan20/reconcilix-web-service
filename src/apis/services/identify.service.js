@@ -2,106 +2,134 @@ const dataAccessLayer = require("../dals/contact.dal");
 const { Op } = require("sequelize");
 
 const identify = async (body) => {
-	const email = body.email;
-	const phoneNumber = body.phoneNumber;
+	try {
+		const email = body.email || null;
+		const phoneNumber = body.phoneNumber?.toString() || null;
 
-	let primaryContact =
-		await dataAccessLayer.findByEmailOrPhoneNumberAndLinkPredence(
-			email,
-			phoneNumber,
-			"primary",
-		);
+		let primaryContact =
+			await dataAccessLayer.findByEmailOrPhoneNumberAndLinkedPrecedence(
+				email,
+				phoneNumber,
+				null,
+			);
 
-	if (primaryContact) {
-		let secondaryContact;
+		if (primaryContact) {
+			/**
+			 * Case 2: When Primary exists, where a new secondary is to be added
+			 */
+			let filter = [];
 
-		/**
-		 * Case 2: When Primary exists, where a new secondary is to be added
-		 */
-		let filter = [];
+			// Case to be handled => Change to Secondary to Primary
+			if (email && phoneNumber) {
+				filter = [{ email }];
+			}
 
-		// Case to be handled => Change to Secondary to Primary
-		if (email && primaryContact) {
-			filter = [{ email }];
-		}
+			/**
+			 * Generic Cases
+			 */
+			if (email && !phoneNumber) {
+				filter = [{ email }];
+			}
+			if (!email && phoneNumber) {
+				filter = [{ phoneNumber }];
+			}
 
-		/**
-		 * Generic Cases
-		 */
-		if (email && !primaryContact) {
-			filter = [{ email }];
-		}
-		if (!email && primaryContact) {
-			filter = [{ primaryContact }];
-		}
-
-		let whereAllSecondaryContacts = {
-			[Op.or]: filter,
-			linkPrecedence: "secondary",
-			linkedId: primaryContact.id,
-		};
-
-		// Retrieve linked contacts
-		const allSecondaryContacts = await dataAccessLayer.getAll({
-			where: whereAllSecondaryContacts,
-		});
-
-		/**
-		 * This check if the data that has come in has anything new
-		 */
-		const shouldAddSecondary =
-			allSecondaryContacts.length == 0 &&
-			((body.email && primaryContact.email !== body.email) ||
-				(body.phoneNumber &&
-					primaryContact.phoneNumber !== body.phoneNumber));
-
-		if (shouldAddSecondary) {
-			secondaryContact = await dataAccessLayer.create({
-				email: body.email,
-				phoneNumber: body.phoneNumber,
-				linkedId: primaryContact.id,
+			let whereAllSecondaryContacts = {
+				[Op.or]: filter,
 				linkPrecedence: "secondary",
+			};
+
+			// Retrieve linked contacts
+			const allSecondaryContacts = await dataAccessLayer.getAll({
+				where: whereAllSecondaryContacts,
 			});
+
+			/**
+			 * This check if the data that has come in has anything new
+			 */
+			const shouldAddSecondary =
+				allSecondaryContacts.length == 0 &&
+				email &&
+				primaryContact.email !== email;
+
+			/**
+			 * Add as Secondary only for email/email+phone
+			 */
+			let secondaryContact;
+			if (shouldAddSecondary) {
+				secondaryContact = await dataAccessLayer.create({
+					email: body.email,
+					phoneNumber: body.phoneNumber,
+					linkedId: primaryContact.id,
+					linkPrecedence: "secondary",
+				});
+			}
+
+			/**
+			 * Update Primary Contact to Secondary only for email/email+phone
+			 */
+			if (email && phoneNumber) {
+				if (phoneNumber == primaryContact.phoneNumber) {
+					console.log("----------------------------------");
+					console.log(allSecondaryContacts.length);
+					console.log("----------------------------------");
+					primaryContact.phoneNumber = phoneNumber;
+					primaryContact.linkPrecedence = "secondary";
+					await dataAccessLayer.save(primaryContact);
+					console.log("----------------------------------");
+					console.log(primaryContact);
+					console.log("----------------------------------");
+				}
+			}
+
+			/**
+			 * Response building logic
+			 */
+			return await buildReportingResponse(
+				email,
+				phoneNumber,
+				primaryContact,
+			);
 		}
 
 		/**
-		 * Response building logic
+		 * Case 1: Creating a Primary Contact when doesnt exist
 		 */
-
-		let where = {
-			[Op.or]: [{ email }, { phoneNumber }],
-			linkPrecedence: "secondary",
-			linkedId: primaryContact.id,
-		};
-
-		// Retrieve linked contacts
-		const secondaryContacts = await dataAccessLayer.getAll({
-			where: where,
+		let newContact = await dataAccessLayer.create({
+			email: body.email,
+			phoneNumber: body.phoneNumber,
+			linkedId: null,
+			linkPrecedence: "primary",
 		});
 
-		// Build response object
-		return buildResponseObject(primaryContact, secondaryContacts);
+		return {
+			contact: {
+				primaryContactId: newContact.id,
+				emails: [newContact.email],
+				phoneNumbers: [newContact.phoneNumber],
+				secondaryContactIds: [],
+			},
+		};
+	} catch (error) {
+		console.log(error);
 	}
+};
 
-	/**
-	 * Case 1: Creating a Primary Contact when doesnt exist
-	 */
-	let newContact = await dataAccessLayer.create({
-		email: body.email,
-		phoneNumber: body.phoneNumber,
-		linkedId: null,
-		linkPrecedence: "primary",
+async function buildReportingResponse(email, phoneNumber, primaryContact) {
+	let where = {
+		[Op.or]: [{ email }, { phoneNumber }],
+		linkPrecedence: "secondary",
+		linkedId: primaryContact.id,
+	};
+
+	// Retrieve linked contacts
+	const secondaryContacts = await dataAccessLayer.getAll({
+		where: where,
 	});
 
-	return {
-		contact: {
-			primaryContactId: newContact.id,
-			emails: [newContact.email],
-			phoneNumbers: [newContact.phoneNumber],
-			secondaryContactIds: [],
-		},
-	};
-};
+	// Build response object
+	return buildResponseObject(primaryContact, secondaryContacts);
+}
 
 function buildResponseObject(existingContact, linkedContacts) {
 	let primaryContactId = existingContact.id;

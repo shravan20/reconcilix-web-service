@@ -61,7 +61,7 @@ const contactRepository = {
 		}
 	},
 
-	findByEmailOrPhoneNumberAndLinkPredence: async (
+	findByEmailOrPhoneNumberAndLinkedPrecedence: async (
 		email,
 		phoneNumber,
 		linkPrecedence,
@@ -75,12 +75,18 @@ const contactRepository = {
 			where = [...where, { phoneNumber }];
 		}
 
-		return await Contact.findOne({
+		if (linkPrecedence) {
+			where = [...where, { linkPrecedence }];
+		}
+
+		let query = {
 			where: {
 				[Op.or]: where,
 			},
 			include: [{ model: Contact, as: "linkedContact" }],
-		});
+		};
+
+		return await Contact.findOne(query);
 	},
 };
 

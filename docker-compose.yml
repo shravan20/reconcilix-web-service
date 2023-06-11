@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    ports:
+      - 3307:3307
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bitespeed
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+
+  bitespeed_app:
+    build: .
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      SERVICE_NAME: reconcilix-web-service
+      PORT: 3000
+      ENV_NAME: development
+      DATABASE_URL: jdbc:mysql://localhost:3306/bitespeed
+      DB_NAME: bitespeed
+      DB_UNAME: root
+      DB_PASSWORD: root
+      DB_HOST: localhost
+      DB_DIALECT: mysql
+    depends_on:
+      - mysql
