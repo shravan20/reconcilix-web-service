@@ -1,0 +1,31 @@
+module.exports = {
+	printWidth: 100,
+	tabWidth: 2,
+	singleQuote: true,
+	semi: true,
+	trailingComma: "all",
+	arrowParens: "always",
+	overrides: [
+		{
+			files: "*.{js,jsx,tsx,ts,scss,json,html}",
+			options: {
+				tabWidth: 4,
+			},
+		},
+	],
+	arrowParens: "always",
+	bracketSameLine: true,
+	bracketSpacing: true,
+	embeddedLanguageFormatting: "auto",
+	htmlWhitespaceSensitivity: "strict",
+	insertPragma: false,
+	jsxSingleQuote: false,
+	printWidth: 80,
+	proseWrap: "preserve",
+	quoteProps: "consistent",
+	requirePragma: false,
+	singleAttributePerLine: false,
+	singleQuote: false,
+	useTabs: true,
+	vueIndentScriptAndStyle: false,
+};

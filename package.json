@@ -1,0 +1,39 @@
+{
+	"name": "reconcilix-web-service",
+	"version": "1.0.0",
+	"description": "Seamless Identity Reconciliation",
+	"main": "index.js",
+	"scripts": {
+		"start": "nodemon index.js",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"prepare": "husky install",
+		"format": "prettier --write \"{,!(node_modules)/**/}*.js\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/shravan20/reconcilix-web-service.git"
+	},
+	"author": "@shravan20",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/shravan20/reconcilix-web-service/issues"
+	},
+	"homepage": "https://github.com/shravan20/reconcilix-web-service#readme",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^16.1.4",
+		"express": "^4.18.2",
+		"joi": "^17.9.2",
+		"mongoose": "^7.2.3",
+		"morgan": "^1.10.0",
+		"mysql2": "^3.3.3",
+		"sequelize": "^6.32.0",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^4.6.3"
+	},
+	"devDependencies": {
+		"husky": "^8.0.3",
+		"nodemon": "^2.0.22",
+		"prettier": "^2.8.8"
+	}
+}
