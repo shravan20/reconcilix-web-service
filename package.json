@@ -9,6 +9,9 @@
 		"prepare": "husky install",
 		"format": "prettier --write \"{,!(node_modules)/**/}*.js\""
 	},
+	"engines": {
+		"node": "19.1.0"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/shravan20/reconcilix-web-service.git"
@@ -23,6 +26,7 @@
 		"cors": "^2.8.5",
 		"dotenv": "^16.1.4",
 		"express": "^4.18.2",
+		"express-validator": "^7.0.1",
 		"joi": "^17.9.2",
 		"mongoose": "^7.2.3",
 		"morgan": "^1.10.0",

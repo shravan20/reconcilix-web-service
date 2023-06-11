@@ -21,18 +21,6 @@ const Contact = sequelizee.define(
 			type: DataTypes.ENUM("secondary", "primary"),
 			allowNull: false,
 		},
-		createdAt: {
-			type: DataTypes.DATE,
-			allowNull: false,
-		},
-		updatedAt: {
-			type: DataTypes.DATE,
-			allowNull: false,
-		},
-		deletedAt: {
-			type: DataTypes.DATE,
-			allowNull: true,
-		},
 	},
 	{
 		indexes: [
@@ -43,6 +31,10 @@ const Contact = sequelizee.define(
 				fields: ["email"],
 			},
 		],
+		timestamps: true,
+		paranoid: true,
+		modelName: "Contact",
+		tableName: "Contact"
 	},
 );
 

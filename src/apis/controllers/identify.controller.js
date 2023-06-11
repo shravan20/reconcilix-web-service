@@ -1,42 +1,18 @@
 const service = require("../services/identify.service");
 const validate = require("../../utils/validation");
+const { check, validationResult } = require("express-validator");
 
-const identify = (request, response, next) => {
+const identify = async (request, response, next) => {
 	try {
-		validateIdentifyRequest(request.body);
-		service.identify(request.body);
-		response.json(service.identify(request.body));
+		const errors = validationResult(request);
+		if (!errors.isEmpty()) {
+			return response.status(422).json({ errors: errors.array() });
+		}
+		let serviceResponse = await service.identify(request.body);
+		console.log(123123)
+        return response.json(serviceResponse);
 	} catch (error) {
 		throw new Error(error);
-	}
-};
-
-const validateIdentifyRequest = (body) => {
-	let phoneNumber = body.phoneNumber;
-	let mail = body.email;
-	console.log((phoneNumber ?? false) && (mail ?? false));
-
-	// check null or undefined
-	let notNullOrUndefined =
-		(phoneNumber ?? mail) !== null && (phoneNumber ?? mail) !== undefined;
-
-	if (!notNullOrUndefined) {
-		throw new Error("Bad_Request");
-	}
-
-	let isValid = false;
-	if (phoneNumber) {
-		isValid = validate.phoneNumber(phoneNumber);
-		if (!isValid) {
-			throw new Error("phoneNumber is not valid format");
-		}
-	}
-
-	if (mail) {
-		isValid = validate.email(mail);
-		if (!isValid) {
-			throw new Error("email is not valid format");
-		}
 	}
 };
 

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const controller = require("../controllers/identify.controller");
+const validate = require('../../utils/validation');
 
 /**
  * @swagger
@@ -28,6 +29,6 @@ const controller = require("../controllers/identify.controller");
  *       "201":
  *         description: Creates a new entry and returns success data against it.
  */
-router.post("/identify", controller.identify);
+router.post("/identify", validate.validateIdentifyRequest(), controller.identify);
 
 module.exports = router;
