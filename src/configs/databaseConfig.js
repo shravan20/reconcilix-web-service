@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
+const { Sequelize } = require("sequelize");
 const databaseConfig = require("./environmentConfigs").databaseConfig;
 
-const sequelize = new Sequelize(
+const sequelize = new Sequelize.Sequelize(
 	databaseConfig.name,
 	databaseConfig.username,
 	databaseConfig.password,
@@ -11,17 +11,22 @@ const sequelize = new Sequelize(
 	},
 );
 
-module.exports = {
-	connect: () => {
-		sequelize
-			.authenticate()
-			.then(() => {
-				console.log("Connection has been established successfully.");
-			})
-			.catch((error) => {
-				console.error("Unable to connect to the database: ", error);
-			});
-		sequelize.sync({ force: false });
-	},
-	sequelize: sequelize,
+const combineModels = () => {
+	const models = require("../apis/models/contact");
 };
+
+const connect = async () => {
+	await sequelize
+		.authenticate()
+		.then(() => {
+			console.log("Connection has been established successfully.");
+		})
+		.catch((error) => {
+			console.error("Unable to connect to the database: ", error);
+		});
+	combineModels();
+};
+
+connect();
+
+module.exports = sequelize;

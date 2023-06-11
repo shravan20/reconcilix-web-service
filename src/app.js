@@ -13,7 +13,6 @@ let configs = require("./configs/environmentConfigs");
 swaggerMiddleware(app);
 apiMiddleware(app);
 routerMiddleware(app);
-database.connect();
 
 console.log(
 	`${configs.serviceName} Server running on ${configs.environmentName} environment`,

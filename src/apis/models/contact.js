@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("./index").sequelize; // Assuming you have a Sequelize instance already initialized
+const sequelizee = require('../../configs/databaseConfig');
 
-const Contact = sequelize.define("Contact", {
+const Contact = sequelizee.define("Contact", {
 	id: {
 		type: DataTypes.INTEGER,
 		autoIncrement: true,
@@ -40,9 +40,6 @@ Contact.belongsTo(Contact, {
 	constraints: false,
 });
 
-Contact
-	.sync({ force: false })
-	.then(() => console.log("Contact Model Synced"))
-	.catch((err) => console.log("Error in Contact Model Syncing: ", err));
+Contact.sync();
 
 module.exports = Contact;
